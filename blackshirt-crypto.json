@@ -1,0 +1,354 @@
+{
+  "meta": {
+    "last_updated": "2026-05-24",
+    "updated_by": "blackshirt-crypto",
+    "version": "1.0",
+    "description": "Master data file for Bitcoin Miner Hosting ROI Comparison tool. Edit this file to update host rates, notes, signals, and pool data. Push to GitHub to update the live tool.",
+    "network_ehs": 963,
+    "block_reward": 3.125
+  },
+  "hosts": [
+    {
+      "name": "Simple Mining",
+      "loc": "Iowa, USA",
+      "url": "https://www.simplemining.io",
+      "rate": 0.075,
+      "estHostRate": 0.045,
+      "billingModel": "kwh",
+      "flatFee": null,
+      "oneTime": 0,
+      "cls": "",
+      "brands": ["Bitmain"],
+      "marketplace": false,
+      "poolFreedom": "any",
+      "poolDetails": "Any pool — confirmed in FAQ docs. Discounted fees via Luxor (1.2%) and NiceHash (0.5%) as preferred partners. Full stratum freedom including BCH, solo endpoints.",
+      "notes": "Bitmain-certified repair center (free 12 mo) · precision billing — pay only when hashing · pause feature · any pool incl. BCH/solo · no marketplace"
+    },
+    {
+      "name": "Compass Mining",
+      "loc": "22 farms, USA",
+      "url": "https://compassmining.io",
+      "rate": 0.085,
+      "estHostRate": 0.048,
+      "billingModel": "kwh",
+      "flatFee": null,
+      "oneTime": 0,
+      "cls": "",
+      "brands": ["Bitmain", "MicroBT", "Canaan"],
+      "marketplace": true,
+      "poolFreedom": "any",
+      "poolDetails": "Any pool — dashboard supports custom stratum endpoints via 'Other Pool' option. Full stratum freedom including BCH, solo, or any SHA-256 endpoint.",
+      "notes": "Accepts Bitmain + MicroBT + Canaan · own hardware marketplace with resale · 22 farm locations · history of issues 2021–2023; improved since"
+    },
+    {
+      "name": "Bitkern",
+      "loc": "USA + global",
+      "url": "https://www.bitkern.com",
+      "rate": 0.0795,
+      "estHostRate": 0.046,
+      "billingModel": "kwh",
+      "flatFee": null,
+      "oneTime": 0,
+      "cls": "",
+      "brands": ["Bitmain", "MicroBT"],
+      "marketplace": false,
+      "poolFreedom": "unknown",
+      "poolDetails": "Not confirmed publicly — contact Bitkern to verify stratum freedom before signing. Ask specifically about BCH pools and solo endpoints.",
+      "notes": "LITE (50% uptime) or PRO (99%) tiers · hosting fee deducted from miner revenue — not billed separately · confirm brand and pool policy before shipping"
+    },
+    {
+      "name": "Lonestar Miners",
+      "loc": "Texas, USA",
+      "url": null,
+      "rate": 0.09,
+      "estHostRate": 0.050,
+      "billingModel": "kwh",
+      "flatFee": null,
+      "oneTime": 0,
+      "cls": "",
+      "brands": ["Bitmain"],
+      "marketplace": false,
+      "poolFreedom": "unknown",
+      "poolDetails": "Not confirmed publicly — standard $/kWh billing suggests full stratum freedom (they earn regardless of pool) but verify directly before signing.",
+      "notes": "Immersion cooling available · overclocking firmware · downtime credits · 95%+ SLA · confirm brand and pool policy before shipping"
+    },
+    {
+      "name": "Terra Hosting",
+      "loc": "Indiana, USA",
+      "url": "https://terrahosting.io",
+      "rate": 0.0825,
+      "estHostRate": 0.047,
+      "billingModel": "kwh",
+      "flatFee": null,
+      "oneTime": 100,
+      "cls": "",
+      "brands": ["Bitmain"],
+      "marketplace": false,
+      "poolFreedom": "any",
+      "poolDetails": "Any pool — onboarding form asks for your pool URL and worker name, confirming you configure your own pool. Full stratum freedom implied by $/kWh billing model.",
+      "notes": "97% SLA with credit if missed · phone support (no ticket queue) · former military base · stores OEM packaging · $100 one-time setup fee · full pool freedom"
+    },
+    {
+      "name": "BT-Miners",
+      "loc": "USA",
+      "url": "https://bt-miners.com",
+      "rate": 0.105,
+      "estHostRate": 0.052,
+      "billingModel": "kwh",
+      "flatFee": null,
+      "oneTime": 50,
+      "cls": "",
+      "brands": ["Bitmain"],
+      "marketplace": true,
+      "poolFreedom": "unknown",
+      "poolDetails": "Not confirmed publicly — contact before signing. $/kWh billing model suggests freedom but as primarily a retailer, verify hosting pool policy specifically.",
+      "notes": "12-mo contract gets lower $0.10/kWh rate · $50 one-time setup fee · has own miner marketplace · primarily a retailer with hosting as add-on"
+    },
+    {
+      "name": "Abundant Mines",
+      "loc": "Oregon, USA",
+      "url": "https://abundantmines.com",
+      "rate": null,
+      "estHostRate": 0.040,
+      "billingModel": "flat",
+      "flatFee": null,
+      "oneTime": 0,
+      "cls": "",
+      "brands": ["Bitmain", "MicroBT", "Canaan"],
+      "marketplace": false,
+      "poolFreedom": "any",
+      "poolDetails": "Any pool — their site states 'Choose your own pool (or use our favorite, Lincoin)'. Full stratum freedom confirmed. Can point to BCH pools or solo endpoints.",
+      "notes": "100% Bonneville hydro power · Hashrate Redirect™ during repairs · $0 repair bills · no OR sales tax · 95% SLA / 98%+ actual · site visits offered · choose any pool incl. Lincoin · contact for flat monthly rate"
+    },
+    {
+      "name": "AsicHive",
+      "loc": "USA",
+      "url": null,
+      "rate": null,
+      "estHostRate": 0.045,
+      "billingModel": "kwh",
+      "flatFee": null,
+      "oneTime": 0,
+      "cls": "",
+      "brands": ["Bitmain"],
+      "marketplace": false,
+      "poolFreedom": "unknown",
+      "poolDetails": "Not confirmed — contact directly. Ask about BCH pool support and solo stratum endpoints before committing.",
+      "notes": "Contact for pricing · ASIC/GPU focus · data security background · brand and pool policy — ask directly"
+    },
+    {
+      "name": "Block Ops Mining",
+      "loc": "Arkansas, USA",
+      "url": "https://www.blockopsmining.com",
+      "rate": null,
+      "estHostRate": 0.045,
+      "billingModel": "kwh",
+      "flatFee": null,
+      "oneTime": 0,
+      "cls": "",
+      "brands": ["Bitmain"],
+      "marketplace": false,
+      "poolFreedom": "unknown",
+      "poolDetails": "Not confirmed — small boutique operator. Contact Ricky Garcia directly. $/kWh billing suggests freedom but verify explicitly.",
+      "notes": "Contact Ricky Garcia for pricing · small boutique facility · Hobbyist Miner trusted · brand and pool policy — ask directly"
+    },
+    {
+      "name": "DataPrana",
+      "loc": "Iowa + Texas, USA",
+      "url": null,
+      "rate": null,
+      "estHostRate": 0.044,
+      "billingModel": "kwh",
+      "flatFee": null,
+      "oneTime": 0,
+      "cls": "",
+      "brands": ["Bitmain"],
+      "marketplace": false,
+      "poolFreedom": "unknown",
+      "poolDetails": "Not confirmed — contact Igor Kovalyshkin directly. New facility so policies may still be forming.",
+      "notes": "Contact Igor Kovalyshkin for pricing · new 30MW immersion-cooled TX site · Hobbyist Miner trusted · brand and pool policy — ask directly"
+    },
+    {
+      "name": "Sazmining",
+      "loc": "Paraguay/Ethiopia/S.Dakota",
+      "url": "https://www.sazmining.com",
+      "rate": 0.060,
+      "estHostRate": 0.025,
+      "billingModel": "kwh",
+      "flatFee": null,
+      "oneTime": 0,
+      "cls": "row-saz",
+      "brands": ["Bitmain"],
+      "marketplace": false,
+      "poolFreedom": "restricted",
+      "poolDetails": "Luxor or OCEAN only — no other pools permitted. Cannot point to BCH pools, Foundry, AntPool, Braiins, ViaBTC, or any solo endpoint. Fee is taken via Luxor payout so stratum must route through Sazmining infrastructure. Luxor fee discounted to 0.7% for Saz customers. OCEAN uses TIDES non-custodial payouts.",
+      "notes": "⚠ Fee = % of gross revenue NOT net profit — they earn even when you lose · at-cost rate (verify directly) · Luxor or OCEAN pool only — no BCH/solo · 100% carbon-free · ship-to-you after 12-mo min · 1-yr contract auto-renews · $100 + shipping to retrieve miner"
+    },
+    {
+      "name": "ASL Miner",
+      "loc": "Russia",
+      "url": "https://aslminer.com",
+      "rate": 0.065,
+      "estHostRate": 0.030,
+      "billingModel": "kwh",
+      "flatFee": null,
+      "oneTime": 0,
+      "cls": "row-asl",
+      "brands": ["Bitmain", "MicroBT", "Canaan", "IceRiver", "Goldshell"],
+      "marketplace": true,
+      "poolFreedom": "unknown",
+      "poolDetails": "Not confirmed — no hosting-specific documentation found. Russia-based facilities add uncertainty. Contact directly and ask specifically about pool stratum configuration.",
+      "notes": "⚠ Hosting in Russia — geopolitical/sanctions risk · elec. rate only; op fee unknown (real cost higher) · accepts widest brand range · own marketplace · reviews for hardware sales only — no hosting reviews found"
+    }
+  ],
+  "signals": {
+    "Simple Mining": {
+      "signal": "strong",
+      "reviewCount": 25,
+      "sources": "Trustpilot (25 reviews)",
+      "positives": [
+        "Transparent pricing — no surprise fees",
+        "Site visit access reported by customers",
+        "Fast, clear support responses",
+        "Precision billing praised (pay only when hashing)"
+      ],
+      "negatives": ["Small review sample size (25 total)"],
+      "warnings": []
+    },
+    "Compass Mining": {
+      "signal": "mixed",
+      "reviewCount": 778,
+      "sources": "Trustpilot (778), Reddit, ComplaintsBoard, BitcoinMiningCheck",
+      "positives": [
+        "2025–2026 reviews meaningfully better than historical",
+        "New leadership since 2022 improving operations",
+        "Large network gives location flexibility"
+      ],
+      "negatives": [
+        "Reddit: repeated complaints of downtime and poor support 2021–2023",
+        "Machines stranded in Russia during sanctions era",
+        "ComplaintsBoard: 1.1 stars from 13 complaints",
+        "Described as middleman reliant on third-party facilities"
+      ],
+      "warnings": ["History matters here — vet current facility contracts carefully before signing"]
+    },
+    "Bitkern": {
+      "signal": "limited",
+      "reviewCount": 14,
+      "sources": "Trustpilot (14 reviews)",
+      "positives": [
+        "One reviewer confirmed clean 14-day cancellation and full refund",
+        "Fast setup reported (near-instant with credit card)"
+      ],
+      "negatives": ["Hosting deducted from miner revenue rather than billed separately — surprised some users"],
+      "warnings": ["Too few independent reviews to draw strong conclusions"]
+    },
+    "Lonestar Miners": {
+      "signal": "limited",
+      "reviewCount": 0,
+      "sources": "No independent reviews found",
+      "positives": ["Hobbyist Miner community mentions as a known option"],
+      "negatives": [],
+      "warnings": ["No Trustpilot, Reddit, or forum reviews found — contact directly and ask for references"]
+    },
+    "Terra Hosting": {
+      "signal": "strong",
+      "reviewCount": 41,
+      "sources": "Trustpilot (41 reviews)",
+      "positives": [
+        "Consistent praise for fast communication and transparency",
+        "Equipment treated with care — cleaned before return",
+        "Facility move in 2025 handled with minimal downtime",
+        "New machines stored in OEM packaging with foam inserts"
+      ],
+      "negatives": ["One incident: former employee mishandled equipment return — Terra took responsibility and made customer whole"],
+      "warnings": []
+    },
+    "BT-Miners": {
+      "signal": "limited",
+      "reviewCount": 0,
+      "sources": "Reviews found for hardware sales only, not hosting",
+      "positives": ["Hobbyist Miner trusted vendor for hardware purchases"],
+      "negatives": [],
+      "warnings": ["Hosting-specific reviews not found — company is primarily a miner retailer with hosting as secondary"]
+    },
+    "Abundant Mines": {
+      "signal": "limited",
+      "reviewCount": 1,
+      "sources": "Trustpilot (1 review), VoskCoin independent review",
+      "positives": [
+        "US-based Oregon — adds baseline credibility",
+        "Hobbyist Miner trusted",
+        "Hashrate Redirect technology unique in the market"
+      ],
+      "negatives": [
+        "VoskCoin noted: all testimonials on company website only — no external verification",
+        "No upfront pricing published",
+        "Limited equipment transparency reported"
+      ],
+      "warnings": ["Simply too new for meaningful review data — not a red flag, just proceed with eyes open"]
+    },
+    "AsicHive": {
+      "signal": "limited",
+      "reviewCount": 0,
+      "sources": "No independent reviews found",
+      "positives": ["Long-running company with data security background"],
+      "negatives": [],
+      "warnings": ["No public reviews found — contact directly and ask for customer references"]
+    },
+    "Block Ops Mining": {
+      "signal": "limited",
+      "reviewCount": 0,
+      "sources": "No independent reviews found",
+      "positives": ["Hobbyist Miner trusted · small boutique operator — personal relationship possible"],
+      "negatives": [],
+      "warnings": ["No public reviews — small facility, ask for references from existing customers"]
+    },
+    "DataPrana": {
+      "signal": "limited",
+      "reviewCount": 0,
+      "sources": "No independent reviews found",
+      "positives": ["Hobbyist Miner trusted · new 30MW TX site suggests real infrastructure investment"],
+      "negatives": [],
+      "warnings": ["Very new — no review history yet. Hobbyist Miner endorsement is meaningful given his audience accountability"]
+    },
+    "Sazmining": {
+      "signal": "mixed",
+      "reviewCount": 66,
+      "sources": "Trustpilot (66 reviews)",
+      "positives": [
+        "Positive reviewers cite reliable operations across Paraguay, Ethiopia, S. Dakota",
+        "Good communication reported by satisfied customers",
+        "Low at-cost power rate is genuinely competitive"
+      ],
+      "negatives": [
+        "Multi-year customer reported net loss of $26K+ over 2 years",
+        "$19,000 taken with no refund reported; customer booted from Telegram when complaining",
+        "Support response to public reviews faster than to direct emails"
+      ],
+      "warnings": [
+        "⚠ FEE STRUCTURE: Sazmining takes % of gross revenue, NOT net profit. They earn even in months you lose money — understand this before signing",
+        "⚠ One reviewer reported a facility shutdown with unexpected $2,200/machine charge"
+      ]
+    },
+    "ASL Miner": {
+      "signal": "mixed",
+      "reviewCount": 54,
+      "sources": "Trustpilot (54 reviews) — hardware sales only",
+      "positives": [
+        "Hardware sales well-reviewed (3.9 stars, 54 reviews)",
+        "Sells Bitmain, MicroBT, Canaan, IceRiver, Goldshell — broad brand support",
+        "Fast shipping reported",
+        "Sales staff praised for communication"
+      ],
+      "negatives": [
+        "All reviews are for hardware purchases — no hosting-specific reviews found",
+        "Communication via WhatsApp/social media feels informal to some buyers"
+      ],
+      "warnings": [
+        "⚠ Hosting facilities are in Russia (Irkutsk, Khabarovsk, Moscow) — geopolitical risk, sanctions exposure, no practical ability to retrieve hardware if problems arise",
+        "⚠ Electricity rate quoted does NOT include operation fee — true all-in cost is unknown"
+      ]
+    }
+  }
+}

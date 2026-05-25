@@ -1,0 +1,27 @@
+{
+  "_schema_notes": {
+    "description": "Community-contributed notes for the Bitcoin Miner Hosting ROI Comparison tool.",
+    "how_to_contribute": "See CONTRIBUTING.md for full instructions. Fork the repo, add your entry below following the schema, submit a Pull Request.",
+    "fields": {
+      "host": "Exact name of the hosting company as it appears in the tool",
+      "contributor": "Your GitHub username",
+      "date": "Date of your experience or observation (YYYY-MM-DD)",
+      "type": "One of: rate_update | customer_experience | pool_policy | brand_policy | warning | correction",
+      "note": "Your factual observation. Be specific — include dates, dollar amounts, what happened.",
+      "verified": "Leave as false — blackshirt-crypto sets this to true after review",
+      "source": "Optional — URL or reference supporting your note"
+    }
+  },
+  "notes": [
+    {
+      "_example": true,
+      "host": "Terra Hosting",
+      "contributor": "example_github_user",
+      "date": "2026-05-01",
+      "type": "customer_experience",
+      "note": "Confirmed $0.0825/kWh rate is still current as of May 2026. Setup took 3 days from miner arrival to hashing. Support responded within 2 hours by phone.",
+      "verified": false,
+      "source": null
+    }
+  ]
+}

@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bitcoin Miner Hosting ROI Comparison</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0d0f12;--bg2:#13161b;--bg3:#1a1e26;
+    --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+    --text:#e8eaf0;--text2:#8b90a0;--text3:#555b6e;
+    --orange:#f5820a;--orange3:rgba(245,130,10,0.06);
+    --green:#22c55e;--red:#ef4444;--amber:#f59e0b;--amber2:rgba(245,158,11,0.1);
+    --blue:#3b82f6;--teal:#14b8a6;
+    --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;padding:24px 20px 80px;}
+
+  /* HEADER */
+  .header{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;}
+  .header h1{font-family:var(--mono);font-size:21px;font-weight:600;color:var(--orange);letter-spacing:-0.5px;}
+  .header-sub{font-size:12px;color:var(--text2);margin-top:3px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:5px;animation:pulse 2s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+  .updated-badge{font-family:var(--mono);font-size:10px;color:var(--text3);background:var(--bg3);padding:2px 8px;border-radius:10px;border:1px solid var(--border);}
+  .data-err{font-family:var(--mono);font-size:11px;color:var(--red);background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:6px;padding:8px 12px;margin-bottom:12px;display:none;}
+
+  /* BTC BADGE */
+  .btc-badge{display:flex;flex-direction:column;align-items:flex-end;gap:4px;}
+  .btc-live-row{display:flex;align-items:center;gap:8px;}
+  .btc-price-val{font-family:var(--mono);font-size:26px;font-weight:600;color:var(--orange);}
+  .btc-source{font-size:11px;color:var(--text3);font-family:var(--mono);}
+  .btc-status{font-size:10px;font-family:var(--mono);padding:2px 8px;border-radius:10px;border:1px solid;}
+  .btc-status.live{color:var(--green);border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.08);}
+  .btc-status.stale{color:var(--amber);border-color:rgba(245,158,11,0.3);background:var(--amber2);}
+  .btc-status.err{color:var(--red);border-color:rgba(239,68,68,0.3);background:rgba(239,68,68,0.08);}
+  .btc-refresh{font-size:11px;cursor:pointer;font-family:var(--mono);background:none;color:var(--text2);padding:2px 6px;border-radius:4px;border:1px solid var(--border);}
+  .btc-refresh:hover{border-color:var(--border2);color:var(--text);}
+
+  /* CONTROLS */
+  .controls-panel{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px 22px;margin-bottom:20px;}
+  .controls-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:18px;margin-bottom:14px;}
+  .control-group label{display:block;font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;font-family:var(--mono);}
+  .val-display{font-family:var(--mono);font-size:17px;font-weight:600;color:var(--orange);margin-bottom:5px;}
+  .hint{font-size:10px;color:var(--text3);margin-top:3px;}
+  input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:4px;border-radius:2px;background:var(--bg3);outline:none;}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:var(--orange);cursor:pointer;border:2px solid var(--bg);}
+  input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:var(--orange);cursor:pointer;border:2px solid var(--bg);}
+  .network-stats{display:flex;gap:14px;flex-wrap:wrap;padding-top:12px;border-top:1px solid var(--border);}
+  .stat-pill{font-family:var(--mono);font-size:11px;color:var(--text2);background:var(--bg3);padding:3px 9px;border-radius:20px;border:1px solid var(--border);}
+  .stat-pill span{color:var(--text);}
+
+  .section-label{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+
+  /* MINER TABS */
+  .miner-tabs{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
+  .miner-tab{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 18px;cursor:pointer;transition:all 0.2s;}
+  .miner-tab.active{border-color:var(--orange);background:var(--orange3);}
+  .miner-tab:hover:not(.active){border-color:var(--border2);background:var(--bg3);}
+  .mt-label{font-size:11px;color:var(--text2);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:4px;}
+  .mt-name{font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px;}
+  .miner-tab.active .mt-name{color:var(--orange);}
+  .mt-specs{font-family:var(--mono);font-size:11px;color:var(--text3);line-height:1.7;}
+  .mt-price{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--green);margin-top:6px;}
+
+  /* SUMMARY CARDS */
+  .summary-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:20px;}
+  .scard{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:11px 13px;}
+  .sc-label{font-size:10px;text-transform:uppercase;letter-spacing:0.7px;color:var(--text3);font-family:var(--mono);margin-bottom:4px;}
+  .sc-val{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);}
+  .sc-sub{font-size:10px;color:var(--text3);margin-top:2px;}
+
+  /* TABLE */
+  .table-wrap{border:1px solid var(--border);border-radius:12px;overflow:hidden;overflow-x:auto;margin-bottom:20px;}
+  table{width:100%;border-collapse:collapse;min-width:1280px;}
+  thead tr{background:var(--bg3);border-bottom:1px solid var(--border2);}
+  th{font-family:var(--mono);font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.7px;color:var(--text3);padding:9px 11px;text-align:left;white-space:nowrap;}
+  td{padding:10px 11px;font-size:12px;border-bottom:1px solid var(--border);vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  tbody tr{background:var(--bg2);transition:background 0.15s;}
+  tbody tr:hover{background:var(--bg3);}
+  tbody tr.row-saz{background:rgba(59,130,246,0.06);}
+  tbody tr.row-saz:hover{background:rgba(59,130,246,0.1);}
+  tbody tr.row-asl{background:rgba(245,158,11,0.05);}
+  tbody tr.row-asl:hover{background:rgba(245,158,11,0.09);}
+  tbody tr.row-custom{background:rgba(20,184,166,0.05);}
+  tbody tr.row-custom:hover{background:rgba(20,184,166,0.09);}
+
+  /* HOST NAME CELL */
+  .host-name a{font-weight:600;font-size:13px;color:var(--text);text-decoration:none;border-bottom:1px dashed var(--text3);}
+  .host-name a:hover{color:var(--orange);border-bottom-color:var(--orange);}
+  .host-name span{font-weight:600;font-size:13px;color:var(--text);}
+  .host-loc{font-size:11px;color:var(--text3);margin-top:1px;font-family:var(--mono);}
+  .host-note{font-size:10px;color:var(--amber);margin-top:3px;line-height:1.6;}
+  .host-actions{display:flex;gap:5px;margin-top:5px;}
+  .host-badge{display:inline-block;font-size:10px;font-family:var(--mono);padding:1px 6px;border-radius:3px;border:1px solid rgba(20,184,166,0.3);background:rgba(20,184,166,0.1);color:#5eead4;}
+  .edit-btn{font-size:10px;font-family:var(--mono);padding:1px 7px;border-radius:3px;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;transition:all 0.15s;}
+  .edit-btn:hover{color:var(--orange);border-color:var(--orange);}
+
+  /* PROFIT */
+  .profit-pos{font-family:var(--mono);font-size:12px;color:var(--green);font-weight:500;}
+  .profit-neg{font-family:var(--mono);font-size:12px;color:var(--red);font-weight:500;}
+  .sats-cell{font-family:var(--mono);font-size:11px;color:var(--amber);font-weight:500;}
+  .sats-sub{font-size:10px;color:var(--text3);margin-top:2px;font-family:var(--mono);}
+
+  /* TAGS */
+  .tag{display:inline-block;font-family:var(--mono);font-size:10px;padding:2px 6px;border-radius:4px;border:1px solid;}
+  .tag-blue{color:#60a5fa;border-color:rgba(96,165,250,0.3);background:rgba(59,130,246,0.08);}
+  .tag-teal{color:#5eead4;border-color:rgba(20,184,166,0.3);background:rgba(20,184,166,0.08);}
+  .tag-gray{color:var(--text3);border-color:var(--border);background:var(--bg3);}
+
+  .margin-pos{color:var(--green);font-family:var(--mono);font-size:12px;}
+  .margin-mid{color:var(--text2);font-family:var(--mono);font-size:12px;}
+  .margin-low{color:var(--amber);font-family:var(--mono);font-size:12px;}
+
+  .roi-wrap{display:flex;align-items:center;gap:7px;}
+  .roi-bar-bg{width:50px;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;flex-shrink:0;}
+  .roi-bar-fill{height:6px;border-radius:3px;transition:width 0.4s ease;}
+  .roi-text{font-family:var(--mono);font-size:12px;white-space:nowrap;}
+  .roi-good{color:var(--green);}  .roi-ok{color:var(--amber);}  .roi-bad{color:var(--red);}
+
+  /* COMMUNITY SIGNAL */
+  .signal-wrap{display:inline-block;}
+  .signal-badge{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:4px;border:1px solid;cursor:pointer;user-select:none;transition:opacity 0.15s;white-space:nowrap;}
+  .signal-badge:hover{opacity:0.8;}
+  .signal-strong{color:#22c55e;border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.08);}
+  .signal-mixed{color:var(--amber);border-color:rgba(245,158,11,0.3);background:var(--amber2);}
+  .signal-limited{color:var(--text2);border-color:var(--border2);background:var(--bg3);}
+  .signal-flag{color:var(--red);border-color:rgba(239,68,68,0.3);background:rgba(239,68,68,0.08);}
+  .signal-chevron{font-size:9px;transition:transform 0.2s;margin-left:2px;}
+  .signal-chevron.open{transform:rotate(180deg);}
+  .signal-panel{display:none;margin-top:6px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:8px 10px;font-size:10px;color:var(--text2);line-height:1.7;min-width:230px;max-width:290px;}
+  .signal-panel.open{display:block;}
+  .sp-src{font-family:var(--mono);font-size:9px;color:var(--text3);margin-bottom:5px;}
+  .sp-pos{color:var(--green);}  .sp-neg{color:var(--red);}  .sp-warn{color:var(--amber);}
+
+  /* POOL FREEDOM */
+  .pool-wrap{display:inline-block;}
+  .pool-badge{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:4px;border:1px solid;cursor:pointer;user-select:none;transition:opacity 0.15s;white-space:nowrap;}
+  .pool-badge:hover{opacity:0.8;}
+  .pool-any{color:#22c55e;border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.08);}
+  .pool-restricted{color:var(--red);border-color:rgba(239,68,68,0.3);background:rgba(239,68,68,0.08);}
+  .pool-unknown{color:var(--text2);border-color:var(--border2);background:var(--bg3);}
+  .pool-panel{display:none;margin-top:6px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:8px 10px;font-size:10px;color:var(--text2);line-height:1.7;min-width:230px;max-width:290px;}
+  .pool-panel.open{display:block;}
+
+  /* ADD/EDIT MODAL */
+  .add-btn{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:12px;padding:7px 14px;border-radius:7px;border:1px solid rgba(20,184,166,0.4);background:rgba(20,184,166,0.08);color:#5eead4;cursor:pointer;transition:all 0.2s;margin-bottom:20px;}
+  .add-btn:hover{background:rgba(20,184,166,0.15);border-color:rgba(20,184,166,0.6);}
+  .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:100;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto;}
+  .modal-backdrop.open{display:flex;}
+  .modal{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:24px 26px;width:100%;max-width:580px;}
+  .modal h2{font-family:var(--mono);font-size:15px;color:var(--orange);margin-bottom:18px;}
+  .form-row{margin-bottom:13px;}
+  .form-row label{display:block;font-size:11px;font-family:var(--mono);color:var(--text2);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:5px;}
+  .form-row input,.form-row select,.form-row textarea{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:7px;color:var(--text);font-family:var(--mono);font-size:13px;padding:8px 11px;outline:none;transition:border 0.2s;}
+  .form-row input:focus,.form-row select:focus,.form-row textarea:focus{border-color:var(--orange);}
+  .form-row textarea{resize:vertical;min-height:56px;}
+  .form-row select option{background:var(--bg3);}
+  .sub-label{font-size:10px;color:var(--text3);margin-top:4px;}
+  .form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:13px;}
+  .billing-toggle{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;}
+  .billing-opt{padding:8px 12px;border:1px solid var(--border);border-radius:7px;cursor:pointer;text-align:center;font-size:12px;font-family:var(--mono);color:var(--text2);transition:all 0.2s;}
+  .billing-opt.selected{border-color:var(--orange);background:var(--orange3);color:var(--orange);}
+  .conditional-fields{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;margin-top:10px;}
+  .conditional-fields.hidden{display:none;}
+  .chip-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+  .chip{padding:4px 10px;border:1px solid var(--border2);border-radius:14px;font-size:11px;font-family:var(--mono);color:var(--text2);cursor:pointer;transition:all 0.15s;}
+  .chip.on{border-color:var(--orange);background:var(--orange3);color:var(--orange);}
+  .modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:1px solid var(--border);}
+  .btn-cancel{font-family:var(--mono);font-size:12px;padding:7px 16px;border-radius:7px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;}
+  .btn-cancel:hover{color:var(--text);}
+  .btn-save{font-family:var(--mono);font-size:12px;padding:7px 16px;border-radius:7px;border:1px solid rgba(245,130,10,0.4);background:rgba(245,130,10,0.1);color:var(--orange);cursor:pointer;}
+  .btn-save:hover{background:rgba(245,130,10,0.18);}
+
+  /* FOOTER */
+  .footer-note{padding:13px 17px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;font-size:11px;color:var(--text3);line-height:1.8;}
+  .footer-note strong{color:var(--text2);}
+
+  @media(max-width:600px){.miner-tabs{grid-template-columns:1fr;}.summary-cards{grid-template-columns:repeat(2,1fr);}body{padding:14px 12px 60px;}.btc-badge{align-items:flex-start;}.header{flex-direction:column;}}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <h1>⛏ Miner Hosting ROI Comparison</h1>
+    <div class="header-sub">
+      <span><span class="live-dot"></span>Air-cooled miners · All major hosts</span>
+      <span class="updated-badge" id="lastUpdatedBadge">Data: loading…</span>
+    </div>
+  </div>
+  <div class="btc-badge">
+    <div class="btc-live-row">
+      <div>
+        <div class="btc-price-val" id="livePriceVal">$—</div>
+        <div class="btc-source" id="btcSource">BTC/USD live price</div>
+      </div>
+      <span class="btc-status stale" id="priceStatus">loading…</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+      <span id="lastUpdatedTime" style="font-size:10px;color:var(--text3);font-family:var(--mono);">—</span>
+      <button class="btc-refresh" onclick="fetchBTCPrice()">↺ refresh</button>
+    </div>
+  </div>
+</div>
+
+<div class="data-err" id="dataErr">⚠ Could not load host data from blackshirt-crypto.json — showing fallback data. Check your internet connection or the GitHub raw URL.</div>
+
+<!-- CONTROLS -->
+<div class="controls-panel">
+  <div class="controls-grid">
+    <div class="control-group">
+      <label>BTC Price (for calculations)</label>
+      <div class="val-display" id="btcPriceDisplay">$79,000</div>
+      <input type="range" id="btcPrice" min="50000" max="150000" step="1000" value="79000">
+      <div class="hint">Drag slider or click ⚡ Use Live Price</div>
+    </div>
+    <div class="control-group">
+      <label>Pool Fee</label>
+      <div class="val-display" id="poolFeeDisplay">2.0%</div>
+      <input type="range" id="poolFee" min="0" max="5" step="0.5" value="2">
+    </div>
+    <div class="control-group">
+      <label>Difficulty Growth / Year</label>
+      <div class="val-display" id="diffDisplay">0%</div>
+      <input type="range" id="diffGrowth" min="0" max="30" step="5" value="0">
+      <div class="hint">Applies to ROI &amp; 3-yr projections</div>
+    </div>
+    <div class="control-group">
+      <label>Uptime Assumption</label>
+      <div class="val-display" id="uptimeDisplay">98%</div>
+      <input type="range" id="uptime" min="90" max="100" step="1" value="98">
+    </div>
+  </div>
+  <div style="margin-bottom:12px;">
+    <button onclick="useLivePrice()" style="font-family:var(--mono);font-size:11px;padding:5px 12px;border-radius:6px;border:1px solid rgba(34,197,94,0.4);background:rgba(34,197,94,0.08);color:var(--green);cursor:pointer;">⚡ Use Live Price</button>
+  </div>
+  <div class="network-stats">
+    <div class="stat-pill">Network: <span id="networkDisplay">—</span></div>
+    <div class="stat-pill">Block reward: <span>3.125 BTC</span></div>
+    <div class="stat-pill">Hashprice: <span id="hashpriceDisplay">—</span></div>
+    <div class="stat-pill">Rev/TH/day: <span id="grossTHDisplay">—</span></div>
+    <div class="stat-pill">Sats/TH/day: <span id="satsTHDisplay">—</span></div>
+  </div>
+</div>
+
+<!-- MINER SELECTOR -->
+<div class="section-label">Select Miner</div>
+<div class="miner-tabs">
+  <div class="miner-tab active" id="tab-s21xp" onclick="setMiner('s21xp')">
+    <div class="mt-label">Air-cooled · Bitmain</div>
+    <div class="mt-name">Antminer S21 XP</div>
+    <div class="mt-specs">270 TH/s · 3,645W · 13.5 J/TH<br>220–277V standard · ~75 dB</div>
+    <div class="mt-price">$3,500</div>
+  </div>
+  <div class="miner-tab" id="tab-s23" onclick="setMiner('s23')">
+    <div class="mt-label">Air-cooled · Bitmain</div>
+    <div class="mt-name">Antminer S23</div>
+    <div class="mt-specs">318 TH/s · 3,498W · 11 J/TH<br>220–277V standard · ~75 dB</div>
+    <div class="mt-price">$5,700</div>
+  </div>
+</div>
+
+<!-- SUMMARY CARDS -->
+<div class="summary-cards">
+  <div class="scard"><div class="sc-label">Gross Daily Rev</div><div class="sc-val" id="sc-gross">—</div><div class="sc-sub">before elec. &amp; fees</div></div>
+  <div class="scard"><div class="sc-label">Daily Sats Mined</div><div class="sc-val" id="sc-sats">—</div><div class="sc-sub">after pool fee &amp; uptime</div></div>
+  <div class="scard"><div class="sc-label">Daily kWh Used</div><div class="sc-val" id="sc-kwh">—</div><div class="sc-sub">running 24/7</div></div>
+  <div class="scard"><div class="sc-label">Best Daily Net</div><div class="sc-val" id="sc-bestnet">—</div><div class="sc-sub">lowest known rate</div></div>
+  <div class="scard"><div class="sc-label">Best ROI</div><div class="sc-val" id="sc-bestroi">—</div><div class="sc-sub">fastest payback</div></div>
+  <div class="scard"><div class="sc-label">Hardware Cost</div><div class="sc-val" id="sc-hw">—</div><div class="sc-sub">your purchase price</div></div>
+</div>
+
+<!-- TABLE -->
+<div class="section-label">Hosting Comparison</div>
+<button class="add-btn" onclick="openModal(null)">＋ Add Hosting Company</button>
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Host</th>
+        <th>Community Signal</th>
+        <th>Pool / Stratum Freedom</th>
+        <th>Billing Model</th>
+        <th>Monthly Bill</th>
+        <th>Est. Host Power Cost</th>
+        <th>Host Margin</th>
+        <th>Sats / Day · USD Value</th>
+        <th>Daily Net $</th>
+        <th>Monthly Net $</th>
+        <th>Annual Net $</th>
+        <th>ROI</th>
+        <th>3-yr Net After HW</th>
+      </tr>
+    </thead>
+    <tbody id="table-body"></tbody>
+  </table>
+</div>
+
+<!-- FOOTER -->
+<div class="footer-note">
+  <strong>Math:</strong> Gross daily USD = (miner TH/s ÷ network TH/s) × 144 blocks/day × 3.125 BTC × BTC price × (1 − pool fee) × uptime. Daily elec cost = (watts ÷ 1000) × 24h × $/kWh. Daily net = gross − elec. &nbsp;|&nbsp;
+  <strong>Sats/day</strong> = same in satoshis — price-independent raw BTC accumulation. USD value uses slider price. &nbsp;|&nbsp;
+  <strong>Host Margin</strong> = your bill minus estimated facility power cost (~$0.04–0.055/kWh industrial). Higher = more repair buffer. &nbsp;|&nbsp;
+  <strong>Community Signal</strong> = independent third-party reviews only — click any badge for details. &nbsp;|&nbsp;
+  <strong>Pool Freedom</strong> = whether you can point your miner at any SHA-256 stratum endpoint (BCH pools, solo, etc.) — click for details. &nbsp;|&nbsp;
+  <strong>Sazmining</strong> fee is % of gross revenue — they earn even when you lose. Pool restricted to Luxor or OCEAN only. &nbsp;|&nbsp;
+  Data: <a href="https://github.com/blackshirt-crypto/miner-hosting-comparison" target="_blank" rel="noopener" style="color:var(--text2);">blackshirt-crypto.json on GitHub</a>
+</div>
+
+<!-- ADD / EDIT MODAL -->
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal">
+    <h2 id="modalTitle">＋ Add Hosting Company</h2>
+    <div class="form-row-2">
+      <div class="form-row" style="margin-bottom:0">
+        <label>Company Name</label>
+        <input type="text" id="f-name" placeholder="e.g. ValueHash Mining">
+      </div>
+      <div class="form-row" style="margin-bottom:0">
+        <label>Location</label>
+        <input type="text" id="f-loc" placeholder="e.g. Nebraska, USA">
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Website URL</label>
+      <input type="url" id="f-url" placeholder="https://...">
+    </div>
+    <div class="form-row">
+      <label>Billing Model</label>
+      <div class="billing-toggle">
+        <div class="billing-opt selected" id="opt-kwh" onclick="selectBilling('kwh')">$/kWh Rate<br><span style="font-size:10px;opacity:0.7">pay for actual kWh used</span></div>
+        <div class="billing-opt" id="opt-flat" onclick="selectBilling('flat')">Flat Monthly Fee<br><span style="font-size:10px;opacity:0.7">fixed $ per miner/mo</span></div>
+      </div>
+    </div>
+    <div class="conditional-fields" id="fields-kwh">
+      <div class="form-row" style="margin-bottom:0">
+        <label>All-in Rate ($/kWh)</label>
+        <input type="number" id="f-rate" step="0.001" min="0" max="0.5" placeholder="e.g. 0.075">
+        <div class="sub-label">Total you pay per kWh — power, cooling, and management.</div>
+      </div>
+    </div>
+    <div class="conditional-fields hidden" id="fields-flat">
+      <div class="form-row">
+        <label>Monthly Hosting Fee ($/mo per miner)</label>
+        <input type="number" id="f-flatfee" step="1" min="0" placeholder="e.g. 220">
+      </div>
+      <div class="form-row" style="margin-bottom:0">
+        <label>Host's Stated $/kWh (if disclosed)</label>
+        <input type="number" id="f-stated-rate" step="0.001" min="0" placeholder="optional — for margin calc">
+        <div class="sub-label">Leave blank to back-calculate from monthly fee ÷ miner kWh.</div>
+      </div>
+    </div>
+    <div class="form-row-2" style="margin-top:13px;">
+      <div class="form-row" style="margin-bottom:0">
+        <label>Est. Host Power Cost ($/kWh)</label>
+        <input type="number" id="f-hostcost" step="0.001" min="0" max="0.2" value="0.045">
+        <div class="sub-label">US industrial ~$0.040–0.055. Hydro ~$0.040. Overseas ~$0.025.</div>
+      </div>
+      <div class="form-row" style="margin-bottom:0">
+        <label>One-Time Fees ($)</label>
+        <input type="number" id="f-onetime" step="1" min="0" placeholder="e.g. 100 setup fee">
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Pool / Stratum Freedom</label>
+      <select id="f-pool-freedom">
+        <option value="any">✅ Any pool — full stratum freedom</option>
+        <option value="restricted">⚠️ Restricted — specific pools only</option>
+        <option value="unknown">❓ Unknown — not confirmed</option>
+      </select>
+    </div>
+    <div class="form-row" id="pool-details-row">
+      <label>Pool Details (which pools allowed, BCH/solo OK?)</label>
+      <textarea id="f-pool-details" placeholder="e.g. Luxor or OCEAN only. Cannot use BCH pools or solo endpoints." style="min-height:44px;"></textarea>
+    </div>
+    <div class="form-row">
+      <label>Accepted ASIC Brands</label>
+      <div class="chip-row" id="brand-chips">
+        <div class="chip on" data-val="Bitmain">Bitmain</div>
+        <div class="chip" data-val="MicroBT">MicroBT</div>
+        <div class="chip" data-val="Canaan">Canaan</div>
+        <div class="chip" data-val="IceRiver">IceRiver</div>
+        <div class="chip" data-val="Goldshell">Goldshell</div>
+        <div class="chip" data-val="Unknown">Unknown / Ask</div>
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Has Own Hardware Marketplace?</label>
+      <select id="f-marketplace">
+        <option value="no">No</option>
+        <option value="yes">Yes — sells miners directly</option>
+        <option value="unknown">Unknown</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label>Notes</label>
+      <textarea id="f-notes" placeholder="e.g. 97% SLA · phone support · immersion cooling · no lock-in..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" id="modalSaveBtn" onclick="saveHost()">Add to Comparison</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// CONFIG — update this URL after pushing to GitHub
+// ══════════════════════════════════════════════
+const DATA_URL = 'https://raw.githubusercontent.com/blackshirt-crypto/miner-hosting-comparison/main/blackshirt-crypto.json';
+const COMMUNITY_URL = 'https://raw.githubusercontent.com/blackshirt-crypto/miner-hosting-comparison/main/community-notes.json';
+
+// ══════════════════════════════════════════════
+// CONSTANTS
+// ══════════════════════════════════════════════
+const BLOCKS_PER_DAY = 144;
+const BLOCK_REWARD   = 3.125;
+const SATS_PER_BTC   = 1e8;
+let   NETWORK_EHS    = 963; // updated from JSON
+let   NETWORK_THS    = NETWORK_EHS * 1e6;
+
+// ══════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════
+let HOSTS   = [];
+let SIGNALS = {};
+let COMMUNITY_NOTES = [];
+let currentMiner  = 's21xp';
+let btcPrice      = 79000;
+let livePrice     = null;
+let poolFee       = 2;
+let diffGrowth    = 0;
+let uptime        = 98;
+let billingMode   = 'kwh';
+let editingIndex  = null; // null = adding new, number = editing existing
+
+const MINERS = {
+  s21xp:{id:'s21xp',name:'Antminer S21 XP',price:3500,ths:270,watts:3645,jth:13.5},
+  s23:  {id:'s23',  name:'Antminer S23',    price:5700,ths:318,watts:3498,jth:11  }
+};
+
+// ══════════════════════════════════════════════
+// DATA LOADING
+// ══════════════════════════════════════════════
+async function loadData() {
+  try {
+    const res  = await fetch(DATA_URL + '?t=' + Date.now(), {signal:AbortSignal.timeout(8000)});
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+
+    HOSTS   = data.hosts || [];
+    SIGNALS = data.signals || {};
+    if (data.meta) {
+      if (data.meta.network_ehs) { NETWORK_EHS = data.meta.network_ehs; NETWORK_THS = NETWORK_EHS * 1e6; }
+      document.getElementById('networkDisplay').textContent = '~' + NETWORK_EHS + ' EH/s';
+      const badge = document.getElementById('lastUpdatedBadge');
+      badge.textContent = 'Data: ' + (data.meta.last_updated || 'unknown') + ' · v' + (data.meta.version || '?');
+    }
+
+    // Also try to load community notes
+    try {
+      const cr   = await fetch(COMMUNITY_URL + '?t=' + Date.now(), {signal:AbortSignal.timeout(5000)});
+      const cd   = await cr.json();
+      COMMUNITY_NOTES = (cd.notes || []).filter(n => n.verified && !n._example);
+    } catch(e) { /* community notes optional */ }
+
+    render();
+  } catch(e) {
+    console.warn('Failed to load remote data:', e.message);
+    document.getElementById('dataErr').style.display = 'block';
+    document.getElementById('networkDisplay').textContent = '~963 EH/s (fallback)';
+    document.getElementById('lastUpdatedBadge').textContent = 'Data: offline fallback';
+    loadFallbackData();
+    render();
+  }
+}
+
+function loadFallbackData() {
+  // Minimal fallback so tool isn't blank if fetch fails
+  HOSTS = [
+    {name:'Simple Mining',loc:'Iowa, USA',url:'https://www.simplemining.io',rate:0.075,estHostRate:0.045,billingModel:'kwh',flatFee:null,oneTime:0,cls:'',brands:['Bitmain'],marketplace:false,poolFreedom:'any',poolDetails:'Any pool — full stratum freedom confirmed.',notes:'Free 12-mo repairs · precision billing · pause feature'},
+    {name:'Sazmining',loc:'Paraguay/Ethiopia/S.Dakota',url:'https://www.sazmining.com',rate:0.060,estHostRate:0.025,billingModel:'kwh',flatFee:null,oneTime:0,cls:'row-saz',brands:['Bitmain'],marketplace:false,poolFreedom:'restricted',poolDetails:'Luxor or OCEAN only — no BCH pools or solo endpoints.',notes:'⚠ Fee = % of gross revenue NOT net profit · Luxor/OCEAN pool only'}
+  ];
+}
+
+loadData();
+
+// ══════════════════════════════════════════════
+// MATH
+// ══════════════════════════════════════════════
+function hashprice(btc) { return (BLOCKS_PER_DAY * BLOCK_REWARD * btc) / NETWORK_THS; }
+function satsPerTHPerDay() { return (BLOCKS_PER_DAY * BLOCK_REWARD * SATS_PER_BTC) / NETWORK_THS; }
+function effectiveRate(h, m) {
+  if (h.rate !== null && h.rate !== undefined) return h.rate;
+  if (h.flatFee) { return h.flatFee / ((m.watts/1000)*24*30.4); }
+  return null;
+}
+
+// ══════════════════════════════════════════════
+// FORMAT
+// ══════════════════════════════════════════════
+function fmtUSD(n,d=2){const s=n<0?'-$':'$';return s+Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});}
+function fmtUSDint(n){const s=n<0?'-$':'$';return s+Math.abs(Math.round(n)).toLocaleString('en-US');}
+function fmtSats(n){return Math.round(n).toLocaleString('en-US')+' sats';}
+
+// ══════════════════════════════════════════════
+// SIGNAL BADGE
+// ══════════════════════════════════════════════
+const SIG_META = {
+  strong: {icon:'✅',label:'Strong',cls:'signal-strong'},
+  mixed:  {icon:'⚠️',label:'Mixed', cls:'signal-mixed'},
+  limited:{icon:'❓',label:'Limited',cls:'signal-limited'},
+  flag:   {icon:'🚩',label:'Issues', cls:'signal-flag'}
+};
+
+function buildSignalCell(hostName, idx) {
+  const sig  = SIGNALS[hostName];
+  const id   = 'sp_' + idx;
+  if (!sig) return `<td><span class="signal-badge signal-limited" style="cursor:default">❓ No data</span></td>`;
+  const meta = SIG_META[sig.signal] || SIG_META.limited;
+
+  // Merge any verified community notes
+  const cn = COMMUNITY_NOTES.filter(n=>n.host===hostName);
+  let communityHTML = '';
+  if (cn.length) {
+    communityHTML = cn.map(n=>`<div style="color:#5eead4;margin-top:3px">👥 ${n.note} <span style="color:var(--text3)">(${n.contributor}, ${n.date})</span></div>`).join('');
+  }
+
+  let html = `<div class="signal-panel" id="${id}">`;
+  html += `<div class="sp-src">SOURCE: ${sig.sources} · ${sig.reviewCount} reviews</div>`;
+  if (sig.positives?.length) html += sig.positives.map(p=>`<div class="sp-pos">✓ ${p}</div>`).join('');
+  if (sig.negatives?.length) html += sig.negatives.map(n=>`<div class="sp-neg">✗ ${n}</div>`).join('');
+  if (sig.warnings?.length)  html += sig.warnings.map(w=>`<div class="sp-warn">${w}</div>`).join('');
+  html += communityHTML + `</div>`;
+
+  return `<td><div class="signal-wrap">
+    <div class="signal-badge ${meta.cls}" onclick="togglePanel('${id}','schev_${idx}')">
+      ${meta.icon} ${meta.label} <span class="signal-chevron" id="schev_${idx}">▾</span>
+    </div>${html}</div></td>`;
+}
+
+// ══════════════════════════════════════════════
+// POOL FREEDOM BADGE
+// ══════════════════════════════════════════════
+const POOL_META = {
+  any:       {icon:'✅',label:'Any pool',  cls:'pool-any'},
+  restricted:{icon:'⚠️',label:'Restricted',cls:'pool-restricted'},
+  unknown:   {icon:'❓',label:'Unconfirmed',cls:'pool-unknown'}
+};
+
+function buildPoolCell(h, idx) {
+  const freedom = h.poolFreedom || 'unknown';
+  const meta    = POOL_META[freedom] || POOL_META.unknown;
+  const id      = 'pp_' + idx;
+  const details = h.poolDetails || 'No pool policy information available — contact host directly.';
+
+  return `<td><div class="pool-wrap">
+    <div class="pool-badge ${meta.cls}" onclick="togglePanel('${id}','pchev_${idx}')">
+      ${meta.icon} ${meta.label} <span class="signal-chevron" id="pchev_${idx}">▾</span>
+    </div>
+    <div class="pool-panel" id="${id}">
+      <div style="font-size:10px;line-height:1.7;">${details}</div>
+    </div>
+  </div></td>`;
+}
+
+function togglePanel(id, chevId) {
+  const panel = document.getElementById(id);
+  const chev  = document.getElementById(chevId);
+  if (!panel) return;
+  const wasOpen = panel.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.signal-panel.open,.pool-panel.open').forEach(p=>p.classList.remove('open'));
+  document.querySelectorAll('.signal-chevron.open').forEach(c=>c.classList.remove('open'));
+  if (!wasOpen) { panel.classList.add('open'); chev?.classList.add('open'); }
+}
+
+// ══════════════════════════════════════════════
+// LIVE BTC PRICE
+// ══════════════════════════════════════════════
+const PRICE_SOURCES = [
+  {name:'CoinGecko',url:'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd',parse:d=>Math.round(d.bitcoin.usd)},
+  {name:'Binance',  url:'https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT',                  parse:d=>Math.round(parseFloat(d.price))},
+  {name:'CoinCap',  url:'https://api.coincap.io/v2/assets/bitcoin',                                    parse:d=>Math.round(parseFloat(d.data.priceUsd))}
+];
+async function fetchBTCPrice() {
+  const sEl=document.getElementById('priceStatus'), vEl=document.getElementById('livePriceVal');
+  const uEl=document.getElementById('lastUpdatedTime'), srcEl=document.getElementById('btcSource');
+  sEl.textContent='loading…'; sEl.className='btc-status stale';
+  for (const src of PRICE_SOURCES) {
+    try {
+      srcEl.textContent='trying '+src.name+'…';
+      const res=await fetch(src.url,{signal:AbortSignal.timeout(5000)});
+      if(!res.ok) throw new Error();
+      const data=await res.json();
+      livePrice=src.parse(data);
+      if(!livePrice||livePrice<1000) throw new Error();
+      vEl.textContent='$'+livePrice.toLocaleString();
+      sEl.textContent='LIVE'; sEl.className='btc-status live';
+      srcEl.textContent='via '+src.name+' BTC/USD';
+      uEl.textContent='updated '+new Date().toLocaleTimeString();
+      return;
+    } catch(e){/*try next*/}
+  }
+  sEl.textContent='unavailable'; sEl.className='btc-status err';
+  vEl.textContent='$—'; srcEl.textContent='all sources failed'; uEl.textContent='check connection';
+}
+function useLivePrice() {
+  if (!livePrice) { fetchBTCPrice().then(()=>{ if(livePrice) syncLive(); }); return; }
+  syncLive();
+}
+function syncLive() {
+  if (!livePrice) return;
+  btcPrice=livePrice;
+  const s=document.getElementById('btcPrice');
+  s.value=Math.min(Math.max(livePrice,parseInt(s.min)),parseInt(s.max));
+  document.getElementById('btcPriceDisplay').textContent='$'+btcPrice.toLocaleString();
+  render();
+}
+fetchBTCPrice();
+setInterval(fetchBTCPrice,60000);
+
+// ══════════════════════════════════════════════
+// MODAL — add AND edit
+// ══════════════════════════════════════════════
+function openModal(idx) {
+  editingIndex = idx;
+  const isEdit = idx !== null && idx !== undefined;
+  document.getElementById('modalTitle').textContent = isEdit ? '✏ Edit Hosting Company' : '＋ Add Hosting Company';
+  document.getElementById('modalSaveBtn').textContent = isEdit ? 'Save Changes' : 'Add to Comparison';
+
+  if (isEdit) {
+    const h = HOSTS[idx];
+    document.getElementById('f-name').value          = h.name || '';
+    document.getElementById('f-loc').value           = h.loc  || '';
+    document.getElementById('f-url').value           = h.url  || '';
+    document.getElementById('f-hostcost').value      = h.estHostRate || 0.045;
+    document.getElementById('f-onetime').value       = h.oneTime || '';
+    document.getElementById('f-notes').value         = h.notes || '';
+    document.getElementById('f-pool-freedom').value  = h.poolFreedom || 'unknown';
+    document.getElementById('f-pool-details').value  = h.poolDetails || '';
+    document.getElementById('f-marketplace').value   = h.marketplace ? 'yes' : (h.marketplace === false ? 'no' : 'unknown');
+
+    if (h.billingModel === 'flat' && h.flatFee) {
+      selectBilling('flat');
+      document.getElementById('f-flatfee').value = h.flatFee;
+      if (h.rate) document.getElementById('f-stated-rate').value = h.rate;
+    } else {
+      selectBilling('kwh');
+      document.getElementById('f-rate').value = h.rate || '';
+    }
+    // Brands
+    const allBrands = ['Bitmain','MicroBT','Canaan','IceRiver','Goldshell','Unknown'];
+    allBrands.forEach(b => {
+      const chip = document.querySelector(`#brand-chips [data-val="${b}"]`);
+      if (chip) chip.classList.toggle('on', (h.brands||[]).includes(b));
+    });
+  } else {
+    clearModal();
+  }
+  document.getElementById('modalBackdrop').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modalBackdrop').classList.remove('open');
+  editingIndex = null;
+}
+
+function selectBilling(type) {
+  billingMode = type;
+  document.getElementById('opt-kwh').classList.toggle('selected', type==='kwh');
+  document.getElementById('opt-flat').classList.toggle('selected', type==='flat');
+  document.getElementById('fields-kwh').classList.toggle('hidden', type!=='kwh');
+  document.getElementById('fields-flat').classList.toggle('hidden', type!=='flat');
+}
+
+function clearModal() {
+  ['f-name','f-loc','f-url','f-rate','f-flatfee','f-stated-rate','f-notes','f-pool-details'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('f-hostcost').value='0.045';
+  document.getElementById('f-onetime').value='';
+  document.getElementById('f-pool-freedom').value='unknown';
+  document.getElementById('f-marketplace').value='no';
+  document.querySelectorAll('#brand-chips .chip').forEach(c=>c.classList.toggle('on',c.dataset.val==='Bitmain'));
+  selectBilling('kwh');
+}
+
+document.getElementById('brand-chips').addEventListener('click',e=>{
+  const c=e.target.closest('.chip'); if(c) c.classList.toggle('on');
+});
+document.getElementById('modalBackdrop').addEventListener('click',e=>{if(e.target===document.getElementById('modalBackdrop'))closeModal();});
+
+function saveHost() {
+  const name = document.getElementById('f-name').value.trim();
+  const loc  = document.getElementById('f-loc').value.trim() || 'Unknown';
+  const url  = document.getElementById('f-url').value.trim() || null;
+  if (!name) { alert('Please enter a company name.'); return; }
+
+  const estHostRate  = parseFloat(document.getElementById('f-hostcost').value) || 0.045;
+  const oneTime      = parseFloat(document.getElementById('f-onetime').value)  || 0;
+  const notes        = document.getElementById('f-notes').value.trim();
+  const poolFreedom  = document.getElementById('f-pool-freedom').value;
+  const poolDetails  = document.getElementById('f-pool-details').value.trim();
+  const marketplace  = document.getElementById('f-marketplace').value === 'yes';
+  const brands       = Array.from(document.querySelectorAll('#brand-chips .chip.on')).map(c=>c.dataset.val);
+
+  let rate=null, flatFee=null, bm='kwh';
+  if (billingMode==='kwh') {
+    const r=parseFloat(document.getElementById('f-rate').value);
+    if (!r||r<=0){alert('Please enter a valid $/kWh rate.');return;}
+    rate=r; bm='kwh';
+  } else {
+    const ff=parseFloat(document.getElementById('f-flatfee').value);
+    if (!ff||ff<=0){alert('Please enter a valid monthly flat fee.');return;}
+    flatFee=ff; bm='flat';
+    const sr=parseFloat(document.getElementById('f-stated-rate').value);
+    if(sr>0) rate=sr;
+  }
+
+  const hostObj = {
+    name, loc, url, rate, estHostRate, billingModel:bm, flatFee,
+    oneTime, cls:'row-custom', brands, marketplace,
+    poolFreedom, poolDetails, notes, custom:true
+  };
+
+  if (editingIndex !== null) {
+    // Preserve cls if it's a built-in host with special styling
+    if (!HOSTS[editingIndex].custom) hostObj.cls = HOSTS[editingIndex].cls;
+    hostObj.custom = HOSTS[editingIndex].custom || true;
+    HOSTS[editingIndex] = hostObj;
+  } else {
+    HOSTS.push(hostObj);
+  }
+
+  closeModal();
+  render();
+}
+
+// ══════════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════════
+function render() {
+  if (!HOSTS.length) return;
+  const m   = MINERS[currentMiner];
+  const fee = poolFee/100, ut=uptime/100;
+  const hp  = hashprice(btcPrice);
+  const spd = satsPerTHPerDay();
+  const dailyKwh   = (m.watts/1000)*24;
+  const monthlyKwh = dailyKwh*30.4;
+  const grossDailyUSD  = m.ths*hp*(1-fee)*ut;
+  const grossDailySats = m.ths*spd*(1-fee)*ut;
+
+  document.getElementById('hashpriceDisplay').textContent = fmtUSD(hp*1000,2)+'/PH/day';
+  document.getElementById('grossTHDisplay').textContent   = fmtUSD(hp,5)+'/TH/day';
+  document.getElementById('satsTHDisplay').textContent    = Math.round(spd).toLocaleString()+'/TH/day';
+  document.getElementById('sc-gross').textContent  = fmtUSD(grossDailyUSD);
+  document.getElementById('sc-sats').textContent   = fmtSats(grossDailySats);
+  document.getElementById('sc-kwh').textContent    = dailyKwh.toFixed(1)+' kWh';
+  document.getElementById('sc-hw').textContent     = '$'+m.price.toLocaleString();
+
+  let bestNet=-Infinity, bestROI=Infinity;
+  HOSTS.forEach(h=>{
+    const r=effectiveRate(h,m); if(r===null) return;
+    const dn=grossDailyUSD-(dailyKwh*r);
+    if(dn>bestNet) bestNet=dn;
+    if(dn>0){const roi=m.price/(dn*30.4);if(roi<bestROI)bestROI=roi;}
+  });
+  document.getElementById('sc-bestnet').textContent = bestNet>-Infinity?fmtUSD(bestNet):'—';
+  document.getElementById('sc-bestroi').textContent = bestROI<Infinity?bestROI.toFixed(1)+' mo':'—';
+
+  const tbody = document.getElementById('table-body');
+  tbody.innerHTML = '';
+
+  HOSTS.forEach((h, idx) => {
+    const tr = document.createElement('tr');
+    if (h.cls) tr.className = h.cls;
+    const r = effectiveRate(h, m);
+
+    // Name cell
+    const nameDisplay = h.url
+      ? `<a href="${h.url}" target="_blank" rel="noopener">${h.name}</a>`
+      : `<span>${h.name}</span>`;
+    const customBadge = h.custom ? '<span class="host-badge">custom</span> ' : '';
+
+    const nameCell = `<td>
+      <div class="host-name">${customBadge}${nameDisplay}</div>
+      <div class="host-loc">${h.loc}</div>
+      ${h.notes?`<div class="host-note">${h.notes}</div>`:''}
+      <div class="host-actions">
+        <button class="edit-btn" onclick="openModal(${idx})">✏ edit</button>
+      </div>
+    </td>`;
+
+    const signalCell = buildSignalCell(h.name, idx);
+    const poolCell   = buildPoolCell(h, idx);
+
+    // Billing tag
+    let modelTag = h.billingModel==='flat'&&h.flatFee
+      ? `<span class="tag tag-teal">Flat $${h.flatFee}/mo</span>`
+      : (r!==null ? `<span class="tag tag-blue">$/kWh all-in</span>` : `<span class="tag tag-gray">Contact</span>`);
+    const rateStr = r!==null ? `<div style="font-size:11px;color:var(--text2);font-family:var(--mono);margin-top:3px">$${r.toFixed(4)}/kWh</div>` : '';
+    const modelCell = `<td>${modelTag}${rateStr}</td>`;
+
+    if (r === null) {
+      tr.innerHTML = nameCell + signalCell + poolCell + modelCell +
+        `<td colspan="9" style="color:var(--text3);font-size:12px;font-family:var(--mono);vertical-align:middle;">Contact host for pricing — get a quote then use ✏ edit to add it</td>`;
+      tbody.appendChild(tr); return;
+    }
+
+    const monthlyBill   = (h.flatFee&&!h.rate) ? h.flatFee : (monthlyKwh*r);
+    const hostPowerCost = monthlyKwh*h.estHostRate;
+    const hostMargin    = monthlyBill-hostPowerCost;
+    const dailyNetUSD   = grossDailyUSD-(dailyKwh*r);
+    const monthlyNet    = dailyNetUSD*30.4;
+    const annualNet     = dailyNetUSD*365;
+    const dailySatsUSD  = (grossDailySats/SATS_PER_BTC)*btcPrice;
+
+    let threeYrNet=0;
+    for(let mo=0;mo<36;mo++){
+      const df=Math.pow(1+diffGrowth/100,mo/12);
+      threeYrNet+=((grossDailyUSD/df)-(dailyKwh*r))*30.4;
+    }
+    const threeYrAfterHW = threeYrNet - m.price;
+
+    let roiMonths=null;
+    if(dailyNetUSD>0){
+      if(diffGrowth===0){ roiMonths=m.price/monthlyNet; }
+      else{ let cum=0; for(let mo=1;mo<=120;mo++){cum+=(dailyNetUSD/Math.pow(1+diffGrowth/100,mo/12))*30.4;if(cum>=m.price){roiMonths=mo;break;}}}
+    }
+    const roiText  = roiMonths?roiMonths.toFixed(1)+' mo':'∞';
+    const roiClass = roiMonths?(roiMonths<=18?'roi-good':roiMonths<=30?'roi-ok':'roi-bad'):'roi-bad';
+    const roiBarW  = roiMonths?Math.min(100,(36/roiMonths)*100).toFixed(0):0;
+    const roiBarC  = roiMonths?(roiMonths<=18?'var(--green)':roiMonths<=30?'var(--amber)':'var(--red)'):'var(--red)';
+    const mCls     = hostMargin>80?'margin-pos':hostMargin>40?'margin-mid':'margin-low';
+
+    tr.innerHTML = nameCell + signalCell + poolCell + modelCell + `
+      <td style="color:var(--red);font-family:var(--mono);">
+        ${fmtUSDint(monthlyBill)}
+        <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:2px">${monthlyKwh.toFixed(0)} kWh/mo</div>
+      </td>
+      <td><div style="font-size:11px;color:var(--text3);font-family:var(--mono)">~${fmtUSDint(hostPowerCost)}/mo</div></td>
+      <td><div class="${mCls}">+${fmtUSDint(hostMargin)}/mo</div><div style="font-size:10px;color:var(--text3);margin-top:2px">repair buffer</div></td>
+      <td>
+        <div class="sats-cell">${fmtSats(grossDailySats)}</div>
+        <div class="sats-sub">≈ ${fmtUSD(dailySatsUSD)} @ $${btcPrice.toLocaleString()}</div>
+      </td>
+      <td class="${dailyNetUSD>=0?'profit-pos':'profit-neg'}">${fmtUSD(dailyNetUSD)}</td>
+      <td class="${monthlyNet>=0?'profit-pos':'profit-neg'}">${fmtUSDint(monthlyNet)}</td>
+      <td class="${annualNet>=0?'profit-pos':'profit-neg'}">${fmtUSDint(annualNet)}</td>
+      <td><div class="roi-wrap">
+        <div class="roi-bar-bg"><div class="roi-bar-fill" style="width:${roiBarW}%;background:${roiBarC}"></div></div>
+        <span class="roi-text ${roiClass}">${roiText}</span>
+      </div></td>
+      <td class="${threeYrAfterHW>=0?'profit-pos':'profit-neg'}">${fmtUSDint(threeYrAfterHW)}</td>`;
+
+    tbody.appendChild(tr);
+  });
+}
+
+// ══════════════════════════════════════════════
+// MINER SWITCHER & SLIDERS
+// ══════════════════════════════════════════════
+function setMiner(id){
+  currentMiner=id;
+  document.getElementById('tab-s21xp').classList.toggle('active',id==='s21xp');
+  document.getElementById('tab-s23').classList.toggle('active',id==='s23');
+  render();
+}
+document.getElementById('btcPrice').addEventListener('input',function(){btcPrice=parseInt(this.value);document.getElementById('btcPriceDisplay').textContent='$'+btcPrice.toLocaleString();render();});
+document.getElementById('poolFee').addEventListener('input',function(){poolFee=parseFloat(this.value);document.getElementById('poolFeeDisplay').textContent=poolFee.toFixed(1)+'%';render();});
+document.getElementById('diffGrowth').addEventListener('input',function(){diffGrowth=parseInt(this.value);document.getElementById('diffDisplay').textContent=diffGrowth+'%';render();});
+document.getElementById('uptime').addEventListener('input',function(){uptime=parseInt(this.value);document.getElementById('uptimeDisplay').textContent=uptime+'%';render();});
+</script>
+</body>
+</html>
