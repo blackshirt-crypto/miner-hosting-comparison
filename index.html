@@ -24,7 +24,7 @@
   .header-sub{font-size:12px;color:var(--text2);margin-top:3px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
   .live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:5px;animation:pulse 2s infinite;}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
-  .updated-badge{font-family:var(--mono);font-size:10px;color:var(--text3);background:var(--bg3);padding:2px 8px;border-radius:10px;border:1px solid var(--border);}
+  .updated-badge{font-family:var(--mono);font-size:11px;color:var(--orange);background:var(--orange3);padding:3px 10px;border-radius:10px;border:1px solid rgba(245,130,10,0.25);font-weight:500;}
   .data-err{font-family:var(--mono);font-size:11px;color:var(--red);background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:6px;padding:8px 12px;margin-bottom:12px;display:none;}
 
   /* BTC BADGE */
@@ -189,8 +189,8 @@
   <div>
     <h1>⛏ Miner Hosting ROI Comparison</h1>
     <div class="header-sub">
-      <span><span class="live-dot"></span>Air-cooled miners · All major hosts</span>
-      <span class="updated-badge" id="lastUpdatedBadge">Data: loading…</span>
+      <span><span class="live-dot"></span>ASIC Miners · All major hosts</span>
+      <span class="updated-badge" id="lastUpdatedBadge">📅 Data: loading…</span>
     </div>
   </div>
   <div class="btc-badge">
@@ -250,19 +250,12 @@
 
 <!-- MINER SELECTOR -->
 <div class="section-label">Select Miner</div>
-<div class="miner-tabs">
-  <div class="miner-tab active" id="tab-s21xp" onclick="setMiner('s21xp')">
-    <div class="mt-label">Air-cooled · Bitmain</div>
-    <div class="mt-name">Antminer S21 XP</div>
-    <div class="mt-specs">270 TH/s · 3,645W · 13.5 J/TH<br>220–277V standard · ~75 dB</div>
-    <div class="mt-price">$3,500</div>
-  </div>
-  <div class="miner-tab" id="tab-s23" onclick="setMiner('s23')">
-    <div class="mt-label">Air-cooled · Bitmain</div>
-    <div class="mt-name">Antminer S23</div>
-    <div class="mt-specs">318 TH/s · 3,498W · 11 J/TH<br>220–277V standard · ~75 dB</div>
-    <div class="mt-price">$5,700</div>
-  </div>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+  <div style="font-size:11px;color:var(--text3);font-family:var(--mono);">Click a miner to compare · prices are market estimates</div>
+  <button class="add-btn" style="margin-bottom:0;" onclick="openMinerModal(null)">＋ Add Miner</button>
+</div>
+<div class="miner-tabs" id="miner-tabs-container">
+  <!-- populated from blackshirt-crypto.json miners array -->
 </div>
 
 <!-- SUMMARY CARDS -->
@@ -408,6 +401,72 @@
   </div>
 </div>
 
+<!-- MINER ADD/EDIT MODAL -->
+<div class="modal-backdrop" id="minerModalBackdrop">
+  <div class="modal">
+    <h2 id="minerModalTitle">＋ Add Miner</h2>
+    <div class="form-row-2">
+      <div class="form-row" style="margin-bottom:0">
+        <label>Miner Name</label>
+        <input type="text" id="mf-name" placeholder="e.g. Antminer S21 XP">
+      </div>
+      <div class="form-row" style="margin-bottom:0">
+        <label>Brand</label>
+        <select id="mf-brand">
+          <option value="Bitmain">Bitmain (Antminer)</option>
+          <option value="MicroBT">MicroBT (WhatsMiner)</option>
+          <option value="Canaan">Canaan (Avalon)</option>
+          <option value="IceRiver">IceRiver</option>
+          <option value="Goldshell">Goldshell</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row-2" style="margin-top:13px;">
+      <div class="form-row" style="margin-bottom:0">
+        <label>Hashrate (TH/s)</label>
+        <input type="number" id="mf-ths" step="1" min="1" placeholder="e.g. 270">
+      </div>
+      <div class="form-row" style="margin-bottom:0">
+        <label>Power Draw (Watts)</label>
+        <input type="number" id="mf-watts" step="1" min="1" placeholder="e.g. 3645">
+      </div>
+    </div>
+    <div class="form-row-2">
+      <div class="form-row" style="margin-bottom:0">
+        <label>Your Purchase Price ($)</label>
+        <input type="number" id="mf-price" step="100" min="0" placeholder="e.g. 3800">
+        <div class="sub-label">Your actual or expected price — overrides the library estimate.</div>
+      </div>
+      <div class="form-row" style="margin-bottom:0">
+        <label>Cooling Type</label>
+        <select id="mf-cooling">
+          <option value="air">Air cooled</option>
+          <option value="hydro">Hydro cooled</option>
+          <option value="immersion">Immersion cooled</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Voltage / Power Requirements</label>
+      <input type="text" id="mf-voltage" placeholder="e.g. 220–277V standard  OR  380–415V three-phase">
+    </div>
+    <div class="form-row" id="mf-infra-row" style="display:none;">
+      <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:7px;padding:9px 12px;font-size:11px;color:var(--red);font-family:var(--mono);">
+        ⚠ Hydro/immersion miners require special facility infrastructure. Confirm your hosting provider supports this cooling type before purchasing.
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Notes (optional)</label>
+      <textarea id="mf-notes" placeholder="e.g. Best J/TH in class · needs CDU · great for long-term hosting..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeMinerModal()">Cancel</button>
+      <button class="btn-save" id="minerSaveBtn" onclick="saveMiner()">Add Miner</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ══════════════════════════════════════════════
 // CONFIG — update this URL after pushing to GitHub
@@ -429,8 +488,10 @@ let   NETWORK_THS    = NETWORK_EHS * 1e6;
 // ══════════════════════════════════════════════
 let HOSTS   = [];
 let SIGNALS = {};
+let MINERS  = []; // loaded from JSON
 let COMMUNITY_NOTES = [];
-let currentMiner  = 's21xp';
+let currentMinerId = null;
+let editingMinerIdx = null;
 let btcPrice      = 79000;
 let livePrice     = null;
 let poolFee       = 2;
@@ -455,11 +516,12 @@ async function loadData() {
 
     HOSTS   = data.hosts || [];
     SIGNALS = data.signals || {};
+    MINERS  = data.miners || [];
     if (data.meta) {
       if (data.meta.network_ehs) { NETWORK_EHS = data.meta.network_ehs; NETWORK_THS = NETWORK_EHS * 1e6; }
       document.getElementById('networkDisplay').textContent = '~' + NETWORK_EHS + ' EH/s';
       const badge = document.getElementById('lastUpdatedBadge');
-      badge.textContent = 'Data: ' + (data.meta.last_updated || 'unknown') + ' · v' + (data.meta.version || '?');
+      badge.textContent = '📅 Updated: ' + (data.meta.last_updated || 'unknown') + ' · v' + (data.meta.version || '?');
     }
 
     // Also try to load community notes
@@ -469,22 +531,27 @@ async function loadData() {
       COMMUNITY_NOTES = (cd.notes || []).filter(n => n.verified && !n._example);
     } catch(e) { /* community notes optional */ }
 
+    renderMinerTabs();
     render();
   } catch(e) {
     console.warn('Failed to load remote data:', e.message);
     document.getElementById('dataErr').style.display = 'block';
     document.getElementById('networkDisplay').textContent = '~963 EH/s (fallback)';
-    document.getElementById('lastUpdatedBadge').textContent = 'Data: offline fallback';
+    document.getElementById('lastUpdatedBadge').textContent = '📅 Data: offline fallback';
     loadFallbackData();
+    renderMinerTabs();
     render();
   }
 }
 
 function loadFallbackData() {
-  // Minimal fallback so tool isn't blank if fetch fails
   HOSTS = [
     {name:'Simple Mining',loc:'Iowa, USA',url:'https://www.simplemining.io',rate:0.075,estHostRate:0.045,billingModel:'kwh',flatFee:null,oneTime:0,cls:'',brands:['Bitmain'],marketplace:false,poolFreedom:'any',poolDetails:'Any pool — full stratum freedom confirmed.',notes:'Free 12-mo repairs · precision billing · pause feature'},
     {name:'Sazmining',loc:'Paraguay/Ethiopia/S.Dakota',url:'https://www.sazmining.com',rate:0.060,estHostRate:0.025,billingModel:'kwh',flatFee:null,oneTime:0,cls:'row-saz',brands:['Bitmain'],marketplace:false,poolFreedom:'restricted',poolDetails:'Luxor or OCEAN only — no BCH pools or solo endpoints.',notes:'⚠ Fee = % of gross revenue NOT net profit · Luxor/OCEAN pool only'}
+  ];
+  MINERS = [
+    {id:'s21xp_air',name:'Antminer S21 XP',brand:'Bitmain',ths:270,watts:3645,jth:13.5,cooling:'air',voltage:'220–277V standard',price_approx:3800,price_checked:'2026-05-24',notes:'Most efficient air-cooled SHA-256 miner'},
+    {id:'s23_air',name:'Antminer S23',brand:'Bitmain',ths:318,watts:3498,jth:11,cooling:'air',voltage:'220–277V standard',price_approx:5500,price_checked:'2026-05-24',notes:'Best J/TH air-cooled at 11 J/TH'}
   ];
 }
 
@@ -746,8 +813,11 @@ function saveHost() {
 // RENDER
 // ══════════════════════════════════════════════
 function render() {
-  if (!HOSTS.length) return;
-  const m   = MINERS[currentMiner];
+  if (!HOSTS.length || !MINERS.length) return;
+  const m   = currentMinerObj();
+  if (!m) return;
+  // Use price_override (user's actual price) first, then price_approx from library
+  const minerPrice = m.price_override || m.price_approx || 0;
   const fee = poolFee/100, ut=uptime/100;
   const hp  = hashprice(btcPrice);
   const spd = satsPerTHPerDay();
@@ -762,14 +832,14 @@ function render() {
   document.getElementById('sc-gross').textContent  = fmtUSD(grossDailyUSD);
   document.getElementById('sc-sats').textContent   = fmtSats(grossDailySats);
   document.getElementById('sc-kwh').textContent    = dailyKwh.toFixed(1)+' kWh';
-  document.getElementById('sc-hw').textContent     = '$'+m.price.toLocaleString();
+  document.getElementById('sc-hw').textContent     = (m.price_override ? '$' : '~$') + (minerPrice||0).toLocaleString() + (m.price_override ? '' : ' est.');
 
   let bestNet=-Infinity, bestROI=Infinity;
   HOSTS.forEach(h=>{
     const r=effectiveRate(h,m); if(r===null) return;
     const dn=grossDailyUSD-(dailyKwh*r);
     if(dn>bestNet) bestNet=dn;
-    if(dn>0){const roi=m.price/(dn*30.4);if(roi<bestROI)bestROI=roi;}
+    if(dn>0){const roi=minerPrice/(dn*30.4);if(roi<bestROI)bestROI=roi;}
   });
   document.getElementById('sc-bestnet').textContent = bestNet>-Infinity?fmtUSD(bestNet):'—';
   document.getElementById('sc-bestroi').textContent = bestROI<Infinity?bestROI.toFixed(1)+' mo':'—';
@@ -826,12 +896,12 @@ function render() {
       const df=Math.pow(1+diffGrowth/100,mo/12);
       threeYrNet+=((grossDailyUSD/df)-(dailyKwh*r))*30.4;
     }
-    const threeYrAfterHW = threeYrNet - m.price;
+    const threeYrAfterHW = threeYrNet - minerPrice;
 
     let roiMonths=null;
     if(dailyNetUSD>0){
-      if(diffGrowth===0){ roiMonths=m.price/monthlyNet; }
-      else{ let cum=0; for(let mo=1;mo<=120;mo++){cum+=(dailyNetUSD/Math.pow(1+diffGrowth/100,mo/12))*30.4;if(cum>=m.price){roiMonths=mo;break;}}}
+      if(diffGrowth===0){ roiMonths=minerPrice>0?minerPrice/monthlyNet:null; }
+      else{ let cum=0; for(let mo=1;mo<=120;mo++){cum+=(dailyNetUSD/Math.pow(1+diffGrowth/100,mo/12))*30.4;if(cum>=minerPrice){roiMonths=mo;break;}}}
     }
     const roiText  = roiMonths?roiMonths.toFixed(1)+' mo':'∞';
     const roiClass = roiMonths?(roiMonths<=18?'roi-good':roiMonths<=30?'roi-ok':'roi-bad'):'roi-bad';
@@ -864,14 +934,172 @@ function render() {
 }
 
 // ══════════════════════════════════════════════
-// MINER SWITCHER & SLIDERS
+// MINER TABS — dynamic from JSON
 // ══════════════════════════════════════════════
-function setMiner(id){
-  currentMiner=id;
-  document.getElementById('tab-s21xp').classList.toggle('active',id==='s21xp');
-  document.getElementById('tab-s23').classList.toggle('active',id==='s23');
+const COOLING_LABEL = { air:'Air-cooled', hydro:'Hydro-cooled', immersion:'Immersion-cooled' };
+const COOLING_COLOR = { air:'var(--text2)', hydro:'#5eead4', immersion:'#a78bfa' };
+
+function renderMinerTabs() {
+  const container = document.getElementById('miner-tabs-container');
+  if (!container) return;
+  container.innerHTML = '';
+
+  // Adjust grid columns based on count
+  const count = MINERS.length;
+  container.style.gridTemplateColumns = count <= 2 ? '1fr 1fr'
+    : count <= 3 ? '1fr 1fr 1fr'
+    : count <= 4 ? '1fr 1fr 1fr 1fr'
+    : 'repeat(auto-fit,minmax(160px,1fr))';
+
+  MINERS.forEach((m, idx) => {
+    const isActive = m.id === currentMinerId;
+    const priceStr = m.price_override
+      ? '$' + m.price_override.toLocaleString()
+      : m.price_approx
+        ? '~$' + m.price_approx.toLocaleString() + ' est.'
+        : 'Price TBD';
+    const priceDate = m.price_checked ? ` · checked ${m.price_checked}` : '';
+    const jth = m.jth || ((m.watts / 1000) / m.ths * 1000).toFixed(1);
+    const infraWarn = (m.cooling === 'hydro' || m.cooling === 'immersion') && m.infra_warning
+      ? `<div style="font-size:9px;color:var(--red);margin-top:3px;">${m.infra_warning.substring(0,60)}…</div>`
+      : '';
+
+    const tab = document.createElement('div');
+    tab.className = 'miner-tab' + (isActive ? ' active' : '');
+    tab.innerHTML = `
+      <div class="mt-label" style="color:${COOLING_COLOR[m.cooling]||'var(--text2)'}">
+        ${COOLING_LABEL[m.cooling]||m.cooling} · ${m.brand}
+      </div>
+      <div class="mt-name">${m.name}</div>
+      <div class="mt-specs">
+        ${m.ths} TH/s · ${m.watts.toLocaleString()}W · ${jth} J/TH<br>
+        ${m.voltage||'—'} · ${m.noise_db ? m.noise_db+'dB' : '—'}
+      </div>
+      ${infraWarn}
+      <div class="mt-price" title="Market estimate${priceDate}">${priceStr}</div>
+      <div style="display:flex;gap:5px;margin-top:5px;">
+        <button class="edit-btn" onclick="event.stopPropagation();openMinerModal(${idx})">✏ edit</button>
+        ${MINERS.length > 1 ? `<button class="edit-btn" style="color:var(--red);border-color:rgba(239,68,68,0.3);" onclick="event.stopPropagation();removeMiner(${idx})">✕</button>` : ''}
+      </div>`;
+    tab.addEventListener('click', () => setMiner(m.id));
+    container.appendChild(tab);
+  });
+
+  // If no miner selected yet, select first
+  if (!currentMinerId && MINERS.length > 0) {
+    currentMinerId = MINERS[0].id;
+    container.children[0]?.classList.add('active');
+  }
+}
+
+function setMiner(id) {
+  currentMinerId = id;
+  renderMinerTabs();
   render();
 }
+
+function removeMiner(idx) {
+  if (MINERS.length <= 1) return;
+  const removed = MINERS[idx];
+  MINERS.splice(idx, 1);
+  if (currentMinerId === removed.id) currentMinerId = MINERS[0]?.id || null;
+  renderMinerTabs();
+  render();
+}
+
+function currentMinerObj() {
+  return MINERS.find(m => m.id === currentMinerId) || MINERS[0];
+}
+
+// ══════════════════════════════════════════════
+// MINER MODAL
+// ══════════════════════════════════════════════
+function openMinerModal(idx) {
+  editingMinerIdx = idx;
+  const isEdit = idx !== null && idx !== undefined;
+  document.getElementById('minerModalTitle').textContent = isEdit ? '✏ Edit Miner' : '＋ Add Miner';
+  document.getElementById('minerSaveBtn').textContent = isEdit ? 'Save Changes' : 'Add Miner';
+
+  if (isEdit) {
+    const m = MINERS[idx];
+    document.getElementById('mf-name').value    = m.name || '';
+    document.getElementById('mf-brand').value   = m.brand || 'Bitmain';
+    document.getElementById('mf-ths').value     = m.ths || '';
+    document.getElementById('mf-watts').value   = m.watts || '';
+    document.getElementById('mf-price').value   = m.price_override || m.price_approx || '';
+    document.getElementById('mf-cooling').value = m.cooling || 'air';
+    document.getElementById('mf-voltage').value = m.voltage || '';
+    document.getElementById('mf-notes').value   = m.notes || '';
+  } else {
+    document.getElementById('mf-name').value    = '';
+    document.getElementById('mf-brand').value   = 'Bitmain';
+    document.getElementById('mf-ths').value     = '';
+    document.getElementById('mf-watts').value   = '';
+    document.getElementById('mf-price').value   = '';
+    document.getElementById('mf-cooling').value = 'air';
+    document.getElementById('mf-voltage').value = '';
+    document.getElementById('mf-notes').value   = '';
+  }
+  toggleInfraWarning();
+  document.getElementById('minerModalBackdrop').classList.add('open');
+}
+
+function closeMinerModal() {
+  document.getElementById('minerModalBackdrop').classList.remove('open');
+  editingMinerIdx = null;
+}
+
+function toggleInfraWarning() {
+  const cooling = document.getElementById('mf-cooling').value;
+  document.getElementById('mf-infra-row').style.display =
+    (cooling === 'hydro' || cooling === 'immersion') ? 'block' : 'none';
+}
+
+document.getElementById('mf-cooling').addEventListener('change', toggleInfraWarning);
+
+function saveMiner() {
+  const name   = document.getElementById('mf-name').value.trim();
+  const ths    = parseFloat(document.getElementById('mf-ths').value);
+  const watts  = parseFloat(document.getElementById('mf-watts').value);
+  const price  = parseFloat(document.getElementById('mf-price').value);
+  if (!name) { alert('Please enter a miner name.'); return; }
+  if (!ths || ths <= 0) { alert('Please enter a valid hashrate (TH/s).'); return; }
+  if (!watts || watts <= 0) { alert('Please enter valid power draw (Watts).'); return; }
+
+  const jth = ((watts / 1000) / ths * 1000);
+  const newMiner = {
+    id: 'custom_' + Date.now(),
+    name,
+    brand:          document.getElementById('mf-brand').value,
+    ths,
+    watts,
+    jth:            parseFloat(jth.toFixed(2)),
+    cooling:        document.getElementById('mf-cooling').value,
+    voltage:        document.getElementById('mf-voltage').value.trim() || '—',
+    price_override: price > 0 ? price : null,
+    price_approx:   null,
+    price_checked:  null,
+    notes:          document.getElementById('mf-notes').value.trim(),
+    custom:         true
+  };
+
+  if (editingMinerIdx !== null) {
+    newMiner.id = MINERS[editingMinerIdx].id; // keep same id
+    newMiner.custom = MINERS[editingMinerIdx].custom ?? true;
+    MINERS[editingMinerIdx] = newMiner;
+  } else {
+    MINERS.push(newMiner);
+    currentMinerId = newMiner.id;
+  }
+
+  closeMinerModal();
+  renderMinerTabs();
+  render();
+}
+
+document.getElementById('minerModalBackdrop').addEventListener('click', e => {
+  if (e.target === document.getElementById('minerModalBackdrop')) closeMinerModal();
+});
 document.getElementById('btcPrice').addEventListener('input',function(){btcPrice=parseInt(this.value);document.getElementById('btcPriceDisplay').textContent='$'+btcPrice.toLocaleString();render();});
 document.getElementById('poolFee').addEventListener('input',function(){poolFee=parseFloat(this.value);document.getElementById('poolFeeDisplay').textContent=poolFee.toFixed(1)+'%';render();});
 document.getElementById('diffGrowth').addEventListener('input',function(){diffGrowth=parseInt(this.value);document.getElementById('diffDisplay').textContent=diffGrowth+'%';render();});
